@@ -14,7 +14,7 @@ export class Block {
   private enabled = false;
 
   constructor(
-    private readonly scene: THREE.Scene,
+    private readonly parent: THREE.Object3D,
     private readonly addPhysicsBody: AddPhysicsBody,
     private readonly registerObject: (object: THREE.Object3D) => void,
     private readonly unregisterObject: (object: THREE.Object3D) => void,
@@ -37,7 +37,7 @@ export class Block {
     const object3D = new THREE.Object3D();
     object3D.position.copy(position);
     object3D.rotation.y = rotationY;
-    this.scene.add(object3D);
+    this.parent.add(object3D);
     this.object3D = object3D;
     this.registerObject(object3D);
 
@@ -73,15 +73,15 @@ export class Block {
     this.object3D.add(mesh);
   }
 
-  Set(value: boolean) {
+  set(value: boolean) {
     this.enabled = value;
   }
 
-  Get() {
+  get() {
     return this.enabled;
   }
 
-  Debug() {
+  debug() {
     console.log('Block debug:', {
       enabled: this.enabled,
       initialized: this.object3D !== null && this.body !== null,
@@ -94,7 +94,7 @@ export class Block {
     const body = this.body;
 
     if (object3D) {
-      this.scene.remove(object3D);
+      this.parent.remove(object3D);
       object3D.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           child.geometry.dispose();

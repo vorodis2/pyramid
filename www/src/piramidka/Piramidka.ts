@@ -6,6 +6,7 @@ type RegisterObject = (object: THREE.Object3D) => void;
 type RegisterDynamicObject = (object: THREE.Object3D, body: PhysicsBody) => void;
 
 export class Piramidka {
+  public readonly content3D = new THREE.Object3D();
   private readonly size = 0.8;
   private readonly colors = [0x2d72df, 0xe34e50, 0xf5bb39, 0x35a979];
   private readonly rotationY = Math.PI / 2;
@@ -18,7 +19,9 @@ export class Piramidka {
     private readonly unregisterMesh: RegisterObject,
     private readonly registerDynamicObject: RegisterDynamicObject,
     private readonly unregisterDynamicObject: RegisterDynamicObject
-  ) {}
+  ) {
+    this.scene.add(this.content3D);
+  }
 
   initialize(kol: number) {
     if (!Number.isInteger(kol) || kol < 1) {
@@ -54,7 +57,7 @@ export class Piramidka {
     rotationY: number
   ) {
     const block = new Block(
-      this.scene,
+      this.content3D,
       this.addPhysicsBody,
       this.registerMesh,
       this.unregisterMesh,
