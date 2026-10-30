@@ -1,7 +1,7 @@
 import { createElement, useState, type ChangeEvent } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 
-function MenuView() {
+function menuView() {
   const [value1, setValue1] = useState(50);
   const [value2, setValue2] = useState(50);
 
@@ -60,17 +60,17 @@ function MenuView() {
 }
 
 export class Menu {
-  private readonly element = document.createElement('div');
-  private readonly root: Root;
+  private readonly _element = document.createElement('div');
+  private readonly _root: Root;
 
-  constructor(parent: HTMLElement) {
-    parent.append(this.element);
-    this.root = createRoot(this.element);
-    this.root.render(createElement(MenuView));
+  constructor(readonly par: HTMLElement) {
+    this.par.append(this._element);
+    this._root = createRoot(this._element);
+    this._root.render(createElement(menuView));
   }
 
   destroy() {
-    this.root.unmount();
-    this.element.remove();
+    this._root.unmount();
+    this._element.remove();
   }
 }

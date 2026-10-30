@@ -1,16 +1,33 @@
 # Пирамидка v0.1
 
-First prototype: Three.js + OimoPhysics addon + TypeScript + Vite.
+Прототип физической сцены: TypeScript, Vite, Three.js, пакет `oimo` и React.
 
-## Run
+## Запуск
 
 ```bash
 npm install
 npm run dev
 ```
 
-Press **R** to regenerate the physics world and restart the ball.
+Требуется Node.js, совместимый с Vite 7 (20.19+ или 22.12+).
 
-The pyramid is one cube deep (a vertical plane). React controls and pyramid generation modes come next.
+Клавиша **R** пересоздаёт физический мир, пирамиду и шар. Камера управляется мышью через OrbitControls.
 
-Note: OimoPhysics here is the Three.js addon `three/addons/physics/OimoPhysics.js`, not the separate `oimo` npm package.
+Пирамида состоит из четырёх рядов (10 блоков) и имеет глубину в один куб. Два слайдера React-меню пока изменяют только состояние интерфейса.
+
+## Архитектура
+
+- `Glaf` — сцена, камера, рендеринг и физический мир с шагом 1/60 секунды.
+- `Piramidka` — построение и очистка пирамиды.
+- `Block` — контейнер Three.js, примитивы и физическое тело блока.
+- `Menu` — React-интерфейс.
+
+Для освобождения ресурсов приложения предусмотрен `Glaf.destroy()`, для удаления блока — `Block.delete()`.
+
+## Проверка
+
+```bash
+npm run build
+```
+
+Команда проверяет типы TypeScript и создаёт сборку в `dist`. Соглашения проекта описаны в `copilot-instructions.md`.

@@ -9,42 +9,47 @@ export type PhysicsBody = {
 type AddPhysicsBody = (options: Record<string, unknown>) => PhysicsBody;
 
 export class Block {
-  private object3D: THREE.Object3D | null = null;
-  private body: PhysicsBody | null = null;
-  private enabled = false;
+  private _object3D?: THREE.Object3D;
+  private _body?: PhysicsBody;
+  private _x = 0;
+  private _y = 0;
+  private _z = 0;
 
   constructor(
-    private readonly parent: THREE.Object3D,
-    private readonly addPhysicsBody: AddPhysicsBody,
-    private readonly registerObject: (object: THREE.Object3D) => void,
-    private readonly unregisterObject: (object: THREE.Object3D) => void,
-    private readonly registerDynamicObject: (object: THREE.Object3D, body: PhysicsBody) => void,
-    private readonly unregisterDynamicObject: (object: THREE.Object3D, body: PhysicsBody) => void
+    readonly par: THREE.Object3D,
+    private readonly _addPhysicsBody: AddPhysicsBody,
+    private readonly _registerObject: (object: THREE.Object3D) => void,
+    private readonly _unregisterObject: (object: THREE.Object3D) => void,
+    private readonly _registerDynamicObject: (object: THREE.Object3D, body: PhysicsBody) => void,
+    private readonly _unregisterDynamicObject: (object: THREE.Object3D, body: PhysicsBody) => void
   ) {}
+
+  get x() { return this._x; }
+  get y() { return this._y; }
+  get z() { return this._z; }
+
+  set(x: number, y: number, z: number) {
+    this._x = x;
+    this._y = y;
+    this._z = z;
+  }
 
   initialize(
     size: number,
-    position: THREE.Vector3,
     rotationY: number
   ) {
-    if (!Number.isFinite(size) || size <= 0) {
-      throw new RangeError('Block size must be a positive number.');
-    }
-    if (this.object3D || this.body) {
-      throw new Error('Block is already initialized.');
-    }
-
+    this.delete();
     const object3D = new THREE.Object3D();
-    object3D.position.copy(position);
+    object3D.position.set(this._x, this._y, this._z);
     object3D.rotation.y = rotationY;
-    this.parent.add(object3D);
-    this.object3D = object3D;
-    this.registerObject(object3D);
+    this.par.add(object3D);
+    this._object3D = object3D;
+    this._registerObject(object3D);
 
-    const body = this.addPhysicsBody({
+    const body = this._addPhysicsBody({
       type: 'box',
       size: [size, size, size],
-      pos: [position.x, position.y, position.z],
+      pos: [this._x, this._y, this._z],
       rot: [0, rotationY * 180 / Math.PI, 0],
       move: true,
       density: 1 / (size * size * size),
@@ -52,67 +57,45 @@ export class Block {
       restitution: 0.1
     });
 
-    this.body = body;
-    this.registerDynamicObject(object3D, body);
+    this._body = body;
+    this._registerDynamicObject(object3D, body);
   }
 
   addPrimitive(size: number, color: number) {
-    if (!this.object3D) {
-      throw new Error('Initialize the block before adding a primitive.');
+    if (!this._object3D) {
+      throw new Error('Перед добавлением примитива вызовите Block.initialize().');
     }
-    if (!Number.isFinite(size) || size <= 0) {
-      throw new RangeError('Primitive size must be a positive number.');
-    }
-
     const mesh = new THREE.Mesh(
       new THREE.BoxGeometry(size, size, size),
       new THREE.MeshStandardMaterial({ color, roughness: 0.65 })
     );
     mesh.castShadow = true;
     mesh.receiveShadow = true;
-    this.object3D.add(mesh);
-  }
-
-  set(value: boolean) {
-    this.enabled = value;
-  }
-
-  get() {
-    return this.enabled;
-  }
-
-  debug() {
-    console.log('Block debug:', {
-      enabled: this.enabled,
-      initialized: this.object3D !== null && this.body !== null,
-      position: this.object3D?.position.toArray() ?? null
-    });
+    this._object3D.add(mesh);
   }
 
   delete() {
-    const object3D = this.object3D;
-    const body = this.body;
+    const object3D = this._object3D;
+    const body = this._body;
+    if (!object3D) return;
 
-    if (object3D) {
-      this.parent.remove(object3D);
-      object3D.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          child.geometry.dispose();
-          if (Array.isArray(child.material)) {
-            for (const material of child.material) material.dispose();
-          } else {
-            child.material.dispose();
-          }
+    this.par.remove(object3D);
+    object3D.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.geometry.dispose();
+        if (Array.isArray(child.material)) {
+          for (const material of child.material) material.dispose();
+        } else {
+          child.material.dispose();
         }
-      });
-      this.unregisterObject(object3D);
-      this.object3D = null;
+      }
+    });
+    this._unregisterObject(object3D);
+    if (body) {
+      body.remove();
+      this._unregisterDynamicObject(object3D, body);
     }
-
-    if (this.body) {
-      this.body.remove();
-      if (object3D && body) this.unregisterDynamicObject(object3D, body);
-      this.body = null;
-    }
+    this._object3D = undefined;
+    this._body = undefined;
   }
 }

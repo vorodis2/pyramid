@@ -1,71 +1,74 @@
 import * as THREE from 'three';
-import { Block, type PhysicsBody } from './Block';
+import type { Glaf } from './Glaf';
+import { Block } from './Block';
 
-type AddPhysicsBody = (options: Record<string, unknown>) => PhysicsBody;
-type RegisterObject = (object: THREE.Object3D) => void;
-type RegisterDynamicObject = (object: THREE.Object3D, body: PhysicsBody) => void;
-
-export class Piramidka {
-  public readonly content3D = new THREE.Object3D();
-  private readonly size = 0.8;
-  private readonly colors = [0x2d72df, 0xe34e50, 0xf5bb39, 0x35a979];
-  private readonly rotationY = Math.PI / 2;
-  private blocks: Block[] = [];
-
-  constructor(
-    private readonly scene: THREE.Scene,
-    private readonly addPhysicsBody: AddPhysicsBody,
-    private readonly registerMesh: RegisterObject,
-    private readonly unregisterMesh: RegisterObject,
-    private readonly registerDynamicObject: RegisterDynamicObject,
-    private readonly unregisterDynamicObject: RegisterDynamicObject
-  ) {
-    this.scene.add(this.content3D);
-  }
-
-  initialize(kol: number) {
-    if (!Number.isInteger(kol) || kol < 1) {
-      throw new RangeError('Pyramid row count must be a positive integer.');
-    }
-
-    this.clear();
-
-    for (let row = 0; row < kol; row++) {
-      const count = kol - row;
-      for (let i = 0; i < count; i++) {
-        const x = 2 + (i - (count - 1) / 2) * this.size;
-        const localY = row * this.size;
-        const position = new THREE.Vector3(x, localY, 0)
-          .applyAxisAngle(new THREE.Vector3(0, 1, 0), this.rotationY);
-        position.y += this.size / 2;
-        const color = this.colors[(row + i) % this.colors.length];
-
-        this.addBlock(this.size, color, position, this.rotationY);
-      }
-    }
-  }
-
-  clear() {
-    for (const block of this.blocks) block.delete();
-    this.blocks = [];
-  }
-
-  private addBlock(
+export interface Piramidka {
+  par: Glaf;
+  addBlock: (
     size: number,
     color: number,
-    position: THREE.Vector3,
+    x: number,
+    y: number,
+    z: number,
     rotationY: number
-  ) {
-    const block = new Block(
-      this.content3D,
-      this.addPhysicsBody,
-      this.registerMesh,
-      this.unregisterMesh,
-      this.registerDynamicObject,
-      this.unregisterDynamicObject
-    );
-    block.initialize(size, position, rotationY);
-    block.addPrimitive(size, color);
-    this.blocks.push(block);
+  ) => void;
+  initialize: (kol: number) => void;
+  clear: () => void;
+}
+
+export class Piramidka {
+  constructor(par: Glaf) {
+    this.par = par;
+    const content3D = new THREE.Object3D();
+    const size = 0.8;
+    const arrColors = [0x2d72df, 0xe34e50, 0xf5bb39, 0x35a979];
+    const rotationY = Math.PI / 2;
+    let arrBlock: Block[] = [];
+
+    this.par.addToScene(content3D);
+
+    this.addBlock = (
+      size: number,
+      color: number,
+      x: number,
+      y: number,
+      z: number,
+      rotationY: number
+    ) => {
+      const block = new Block(
+        content3D,
+        (options) => this.par.addPhysicsBody(options),
+        (object) => this.par.registerMesh(object),
+        (object) => this.par.unregisterMesh(object),
+        (object, body) => this.par.registerDynamicObject(object, body),
+        (object, body) => this.par.unregisterDynamicObject(object, body)
+      );
+      block.set(x, y, z);
+      block.initialize(size, rotationY);
+      block.addPrimitive(size, color);
+      arrBlock.push(block);
+    };
+
+    this.clear = () => {
+      for (const block of arrBlock) block.delete();
+      arrBlock = [];
+    };
+
+    this.initialize = (kol: number) => {
+      this.clear();
+
+      for (let row = 0; row < kol; row++) {
+        const count = kol - row;
+        for (let i = 0; i < count; i++) {
+          const x = 2 + (i - (count - 1) / 2) * size;
+          const y = row * size + size / 2;
+          const x3D = x * Math.cos(rotationY);
+          const z3D = -x * Math.sin(rotationY);
+          const color = arrColors[(row + i) % arrColors.length];
+
+          this.addBlock(size, color, x3D, y, z3D, rotationY);
+        }
+      }
+    };
   }
 }

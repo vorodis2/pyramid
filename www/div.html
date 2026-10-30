@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Пирамидка DIV</title>
+</head>
+<body style="margin: 0; overflow: hidden;">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./node_modules/three/build/three.module.js",
+        "three/addons/": "./node_modules/three/examples/jsm/",
+        "oimo": "./node_modules/oimo/build/oimo.module.js"
+      }
+    }
+  </script>
+  <script type="module">
+    import { Main } from './src/pirDiv/Main.js';
+
+    new Main();
+  </script>
+</body>
+</html>
