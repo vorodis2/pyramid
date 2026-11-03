@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { OrbitControllerPoint } from './components/OrbitControllerPoint.js';
 
 export class ManagerScan {
   constructor(par) {
@@ -42,7 +42,7 @@ export class ManagerScan {
     });
     this.mirrorObject = null;
 
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls = new OrbitControllerPoint(this.camera, this.renderer.domElement);
     this.controls.target.set(0, 0, 0);
     this.controls.enableDamping = true;
     this.controls.update();

@@ -8,6 +8,8 @@ export class Piramidka {
     this.content3D = new THREE.Object3D();
     this.par.managerScan.scene.add(this.content3D);
     const arrBlock = [];
+    this.arrPiramidka = [];
+    this.getBlockCount = () => arrBlock.length;
     let dropTimeout;
 
     const addBlock = (options) => {
@@ -22,6 +24,32 @@ export class Piramidka {
       clearTimeout(dropTimeout);
       for (const block of arrBlock) block.delete();
       arrBlock.length = 0;
+      this.arrPiramidka.length = 0;
+    };
+
+    this.restartPiramidka = (levels = 4, type = '') => {
+      for (const block of this.arrPiramidka) {
+        block.delete();
+        const index = arrBlock.indexOf(block);
+        if (index !== -1) arrBlock.splice(index, 1);
+      }
+      this.arrPiramidka.length = 0;
+
+      const size = 0.8;
+      for (let row = 0; row < levels; row++) {
+        const count = levels - row;
+        for (let i = 0; i < count; i++) {
+          const block = addBlock({
+            color: null,
+            array: [
+              { type: 'box', size: [size, size, size] }
+            ],
+            pos: [2, row * size + size / 2, (i - (count - 1) / 2) * size],
+            move: true, density: 1 / size ** 3, friction: 0.5, restitution: 0.05
+          });
+          this.arrPiramidka.push(block);
+        }
+      }
     };
 
     this.initialize = () => {
@@ -43,19 +71,7 @@ export class Piramidka {
       });
 
       const size = 0.8;
-      for (let row = 0; row < 4; row++) {
-        const count = 4 - row;
-        for (let i = 0; i < count; i++) {
-          addBlock({
-            color: null,
-            array: [
-              { type: 'box', size: [size, size, size] }
-            ],
-            pos: [2, row * size + size / 2, (i - (count - 1) / 2) * size],
-            move: true, density: 1 / size ** 3, friction: 0.5, restitution: 0.05
-          });
-        }
-      }
+      this.restartPiramidka(4, '');
 
       const radius = 0.6;
       this.ball = addBlock({

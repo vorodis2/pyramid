@@ -1,40 +1,27 @@
 import * as THREE from 'three';
 
-export class ТосканиеОбьекта {
+export class ObjectDragging {
   constructor(par) {
     this.par = par;
     this.obj = null;
+    this._active = true;
 
     const scan = this.par.managerScan;
     const canvas = scan.renderer.domElement;
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
-    let press = null;
+    this.cancel = () => {
+      this.obj = null;
+    };
 
     this.setObj = (block) => {
+      if (!this.active) return;
       this.obj = block;
       console.log(block);
     };
 
     canvas.addEventListener('pointerdown', (event) => {
-      if (event.button !== 0) return;
-      press = { id: event.pointerId, x: event.clientX, y: event.clientY, moved: false };
-    });
-
-    canvas.addEventListener('pointermove', (event) => {
-      if (!press || press.id !== event.pointerId) return;
-      if (Math.hypot(event.clientX - press.x, event.clientY - press.y) > 5) {
-        press.moved = true;
-      }
-    });
-
-    canvas.addEventListener('pointercancel', () => { press = null; });
-
-    canvas.addEventListener('pointerup', (event) => {
-      if (!press || press.id !== event.pointerId) return;
-      const moved = press.moved || Math.hypot(event.clientX - press.x, event.clientY - press.y) > 5;
-      press = null;
-      if (moved || event.button !== 0) return;
+      if (!this.active || event.button !== 0) return;
 
       const rect = canvas.getBoundingClientRect();
       pointer.set(
@@ -51,5 +38,15 @@ export class ТосканиеОбьекта {
         this.setObj(block);
       }
     });
+  }
+
+  get active() {
+    return this._active;
+  }
+
+  set active(value) {
+    this._active = Boolean(value);
+    if (!this._active) this.cancel();
+    this.par.menu?.menuDebager.menuD1.updateDraggingButton(this._active);
   }
 }
