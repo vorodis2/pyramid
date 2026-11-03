@@ -1,23 +1,82 @@
 import * as THREE from 'three';
-import { OrbitControllerPoint } from './components/OrbitControllerPoint.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import * as TWEEN from 'three/addons/libs/tween.module.js';
+import { MVisi3D } from '../visi3D/MVisi3D.js';
 
 export class ManagerScan {
   constructor(par) {
     this.par = par;
 
-    this.scene = new THREE.Scene();
+    this.contHTML = document.createElement('div');
+    document.body.append(this.contHTML);
+    const mobile = navigator.maxTouchPoints > 0 && window.matchMedia('(pointer: coarse)').matches;
+    this.visi3D = new MVisi3D(this.contHTML, null, mobile, true, false, true, false);
+    this.visi3D.yes3d = true;
+    this.content3d = new THREE.Object3D();
+    this.content3d.rotation.x = -Math.PI / 2;
+    this.visi3D.groupObject.add(this.content3d);
+    window.visi3D = this.visi3D;
+    this.visi3D.position3d.boolMouseRight = false;
+    this.visi3D.isDragPan = true;
+    this.visi3D.position3d.minZum = 0.2;
+    this.visi3D.position3d.maxZum = 100;
+    this.visi3D.position3d.powerZum = 15;
+    this.visi3D.position3d.pScane.active = true;
+    this.visi3D.fov = 55;
+    this.visi3D.zume = Math.hypot(8, 7, 15);
+    this.visi3D.rotationX = Math.acos(7 / this.visi3D.zume);
+    this.visi3D.rotationZ = Math.atan2(8, 15);
+    const sceneStorageKey = 'visi3DScene';
+    try {
+      const savedScene = JSON.parse(window.localStorage.getItem(sceneStorageKey));
+      const arrSceneFields = ['xVerh', 'yVerh', 'zVerh', 'rotationX', 'rotationZ', 'zume', 'fov'];
+      if (savedScene && arrSceneFields.every((field) => Number.isFinite(savedScene[field]))
+        && savedScene.zume >= this.visi3D.position3d.minZum
+        && savedScene.zume <= this.visi3D.position3d.maxZum
+        && savedScene.fov > 0 && savedScene.fov < 180) {
+        this.visi3D.setObj(savedScene);
+      }
+    } catch (error) {
+      console.warn('[ManagerScan] Could not restore scene', error);
+    }
+    let sceneChangeTimer;
+    this.traceSceneChange = () => {
+      clearTimeout(sceneChangeTimer);
+      sceneChangeTimer = setTimeout(() => {
+        const sceneState = this.visi3D.getObj();
+        window.localStorage.setItem(sceneStorageKey, JSON.stringify(sceneState));
+        console.log('[ManagerScan] Visi3D scene saved', sceneState);
+      }, 1000);
+    };
+    this.visi3D.arrFunDrag.push(this.traceSceneChange);
+    this.scene = this.visi3D.scene;
+    this.camera = this.visi3D.camera;
+    this.camera.near = 0.1;
+    this.camera.far = 100;
+    this.camera.updateProjectionMatrix();
     this.scene.background = new THREE.Color(0xdce7f2);
-
-    this.camera = new THREE.PerspectiveCamera(
-      55, window.innerWidth / window.innerHeight, 0.1, 100
-    );
-    this.camera.position.set(8, 7, 15);
-
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer = this.visi3D.renderer;
+    this.renderer.domElement.style.zIndex = '0';
     this.renderer.domElement.style.display = 'block';
-    document.body.append(this.renderer.domElement);
+    this.renderer.domElement.style.touchAction = 'none';
+
+    this.foxModel = null;
+    this.foxReady = new GLTFLoader().loadAsync(
+      new URL('../../resources/models/Fox.glb', import.meta.url).href
+    ).then((gltf) => {
+      const model = gltf.scene;
+      const bounds = new THREE.Box3().setFromObject(model);
+      const size = bounds.getSize(new THREE.Vector3());
+      const center = bounds.getCenter(new THREE.Vector3());
+      const scale = 3 / Math.max(size.x, size.y, size.z);
+      model.scale.setScalar(scale);
+      model.position.set(-9 - center.x * scale, -bounds.min.y * scale, 3 - center.z * scale);
+      this.content3d.add(model);
+      this.visi3D.addChildMouse(model);
+      this.foxModel = model;
+    }).catch((error) => {
+      console.error('[ManagerScan] Could not load decorative fox', error);
+    });
 
     this.reflectionBackground = null;
     new THREE.TextureLoader().load(
@@ -42,22 +101,43 @@ export class ManagerScan {
     });
     this.mirrorObject = null;
 
-    this.controls = new OrbitControllerPoint(this.camera, this.renderer.domElement);
-    this.controls.target.set(0, 0, 0);
-    this.controls.enableDamping = true;
-    this.controls.update();
+    const pointControls = this.visi3D.position3d.pScane;
+    this.clickMarker = pointControls.meshSphere;
+    this.clickMarker.material.opacity = 0.4;
+    this.clickMarker.material.depthWrite = false;
+    this.clickMarker.raycast = () => {};
+    const markerCameraPosition = new THREE.Vector3();
+    const updateClickMarkerScale = () => {
+      this.scene.updateMatrixWorld(true);
+      this.clickMarker.getWorldPosition(markerCameraPosition);
+      markerCameraPosition.applyMatrix4(this.camera.matrixWorldInverse);
+      const worldUnitsPerPixel = 2 * Math.max(-markerCameraPosition.z, this.camera.near)
+        / (this.camera.projectionMatrix.elements[5] * this.renderer.domElement.clientHeight);
+      this.clickMarker.scale.setScalar(3.2 * worldUnitsPerPixel);
+    };
+    let wheelMarkerTimer;
+    this.renderer.domElement.addEventListener('wheel', () => {
+      clearTimeout(wheelMarkerTimer);
+      wheelMarkerTimer = setTimeout(() => {
+        if (!this.visi3D.position3d.boolDrag) pointControls.stopMause();
+      }, 600);
+    }, { passive: true });
+    window.addEventListener('blur', () => {
+      clearTimeout(wheelMarkerTimer);
+      this.visi3D.position3d.stageUpNew();
+    });
 
     this.scene.add(new THREE.HemisphereLight(0xffffff, 0x778899, 2));
 
     this.resize = () => {
-      this.camera.aspect = window.innerWidth / window.innerHeight;
-      this.camera.updateProjectionMatrix();
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.visi3D.sizeWindow(0, 0, window.innerWidth, window.innerHeight);
     };
 
     this.update = () => {
-      this.controls.update();
+      TWEEN.update();
+      this.visi3D.position3d.doRender();
+      updateClickMarkerScale();
       if (this.mirrorObject) {
         const background = this.scene.background;
         const visible = this.mirrorObject.visible;
@@ -71,9 +151,10 @@ export class ManagerScan {
           this.scene.background = background;
         }
       }
-      this.renderer.render(this.scene, this.camera);
+      this.visi3D.render();
     };
 
     window.addEventListener('resize', this.resize);
+    this.resize();
   }
 }

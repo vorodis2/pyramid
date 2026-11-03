@@ -61,7 +61,7 @@ export class MenuD1 {
       }, createElement('span', null, 'Scene Parameters'),
       createElement('button', {
         type: 'button',
-        'aria-label': 'Свернуть или развернуть параметры сцены',
+        'aria-label': 'Toggle scene parameters',
         'aria-expanded': this._expanded,
         ref: (element) => { this.toggleButton = element; },
         onClick: () => this.toggle(),
@@ -110,8 +110,8 @@ export class MenuD1 {
       },
       createElement('button', {
         type: 'button',
-        'aria-label': 'Показать FPS и количество блоков',
-        title: 'FPS и количество блоков',
+        'aria-label': 'Show/hide FPS and block count',
+        title: 'Show/hide FPS and block count',
         ref: (element) => {
           this.fpvButton = element;
           this.updateFPVButton(this.par.par.menuFPV.active);
@@ -147,15 +147,15 @@ export class MenuD1 {
       createElement('path', { d: 'M7 13V10M12 13V7M17 13V9M12 17v4M8 21h8' }))),
       createElement('button', {
         type: 'button',
-        title: 'Перетаскивание объектов',
-        'aria-label': 'Перетаскивание объектов',
+        title: 'Enable/disable physics',
+        'aria-label': 'Enable/disable physics',
         ref: (element) => {
-          this.draggingButton = element;
-          this.updateDraggingButton(this.par.par.par.objectDragging.active);
+          this.physicsButton = element;
+          this.updatePhysicsButton(this.par.par.par.managerPhysik.active);
         },
         onClick: () => {
-          const dragging = this.par.par.par.objectDragging;
-          dragging.active = !dragging.active;
+          const physics = this.par.par.par.managerPhysik;
+          physics.active = !physics.active;
         },
         style: {
           width: this.param.wh, height: this.param.wh, flexShrink: 0,
@@ -167,13 +167,14 @@ export class MenuD1 {
         viewBox: '0 0 24 24', width: 20, height: 20, fill: 'none',
         stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
         strokeLinejoin: 'round', 'aria-hidden': true
-      }, createElement('path', { d: 'M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3' })))))
+      }, createElement('path', { d: 'M12 2v8m-4-4 4 4 4-4M4 21h16' }),
+      createElement('circle', { cx: 12, cy: 16, r: 3 })))))
     );
   }
 
-  updateDraggingButton(active) {
-    if (!this.draggingButton) return;
-    this.draggingButton.style.color = active ? this.param.colorActive : this.param.color;
-    this.draggingButton.setAttribute('aria-pressed', String(active));
+  updatePhysicsButton(active) {
+    if (!this.physicsButton) return;
+    this.physicsButton.style.color = active ? this.param.colorActive : this.param.color;
+    this.physicsButton.setAttribute('aria-pressed', String(active));
   }
 }

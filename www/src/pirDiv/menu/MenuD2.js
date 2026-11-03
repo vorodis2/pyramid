@@ -1,32 +1,65 @@
 import { createElement, useState } from 'react';
+import './MenuD2.css';
 
-function pyramidColumns({ param, onChange }) {
-  const [columns, setColumns] = useState(4);
+function pyramidColumns({ param, initialColumns, onChange }) {
+  const [columns, setColumns] = useState(initialColumns);
 
   return createElement(
     'label',
-    { style: { display: 'flex', flexDirection: 'column', gap: param.otstup, marginTop: param.otstup } },
-    createElement('span', null, `Pyramid columns: ${columns}`),
+    { className: 'pyramid-columns-control', style: { marginTop: param.otstup } },
+    createElement('span', { className: 'pyramid-columns-label' }, `Pyramid columns: ${columns}`),
     createElement('input', {
       type: 'range',
-      min: 1,
-      max: 20,
+      className: 'pyramid-columns-slider',
+      min: 5,
+      max: 13,
       step: 1,
       value: columns,
       onChange: (event) => {
         const levels = Number(event.target.value);
+        if (levels === columns) return;
         setColumns(levels);
         onChange(levels);
       },
-      style: { width: '100%', margin: 0, cursor: 'pointer' }
+      style: { '--slider-color': param.color }
     })
   );
+}
+
+function pyramidTypes({ param, initialType, onChange }) {
+  const [selected, setSelected] = useState(initialType);
+  const arrTypes = [
+    { type: 'base', label: 'Horizontal pyramid', path: 'M3 17h4v4H3z M8 17h4v4H8z M13 17h4v4h-4z M18 17h4v4h-4z M5.5 12h4v4h-4z M10.5 12h4v4h-4z M15.5 12h4v4h-4z M8 7h4v4H8z M13 7h4v4h-4z M10.5 2h4v4h-4z' },
+    { type: 'wide', label: 'Wide pyramid', path: 'M12 2 22 17 12 22 2 17Z M12 2v20 M2 17l10-5 10 5 M5 12l7-3 7 3 M8 7l4-2 4 2' },
+    { type: 'spiral', label: 'Spiral pyramid', path: 'M3 18a9 4 0 1 0 18 0 9 4 0 1 0-18 0 M5 13a7 3 0 1 0 14 0 7 3 0 1 0-14 0 M8 8a4 2 0 1 0 8 0 4 2 0 1 0-8 0 M12 2v4' }
+  ];
+  return createElement('div', {
+    role: 'group', 'aria-label': 'Pyramid layout',
+    style: { display: 'flex', gap: param.otstup }
+  }, arrTypes.map(({ type, label, path }) => createElement('button', {
+    key: type, type: 'button', title: label, 'aria-label': label,
+    'aria-pressed': selected === type,
+    onClick: () => { setSelected(type); onChange(type); },
+    style: {
+      width: param.wh, height: param.wh, padding: param.otstup,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      boxSizing: 'border-box', cursor: 'pointer',
+      color: selected === type ? param.colorActive : param.color,
+      transition: `color ${param.timeAnimation}s ease-in-out`
+    }
+  }, createElement('svg', {
+    viewBox: '0 0 24 24', width: 20, height: 20,
+    fill: 'none', stroke: 'currentColor', strokeWidth: 1.3,
+    strokeLinejoin: 'round', 'aria-hidden': true
+  }, createElement('path', { d: path })))));
 }
 
 export class MenuD2 {
   constructor(par) {
     this.par = par;
     this.param = par.param;
+    this.columns = this.par.par.par.piramidka.levels;
+    this.pyramidType = this.par.par.par.piramidka.type;
     this._expanded = window.localStorage.getItem('menuD2') !== 'false';
     window.localStorage.setItem('menuD2', String(this._expanded));
   }
@@ -111,15 +144,21 @@ export class MenuD2 {
         }
       },
       createElement('div', { ref: (element) => { this.body = element; } },
-      createElement(
-        'label',
-        { style: { display: 'flex', alignItems: 'center', gap: this.param.otstup, cursor: 'pointer' } },
-        createElement('input', { type: 'checkbox', style: { margin: 0 } }),
-        'Отладка'
-      ),
+      createElement(pyramidTypes, {
+        param: this.param,
+        initialType: this.pyramidType,
+        onChange: (type) => {
+          this.pyramidType = type;
+          this.par.par.par.piramidka.restartPiramidka(this.columns, type);
+        }
+      }),
       createElement(pyramidColumns, {
         param: this.param,
-        onChange: (levels) => this.par.par.par.piramidka.restartPiramidka(levels, '')
+        initialColumns: this.columns,
+        onChange: (levels) => {
+          this.columns = levels;
+          this.par.par.par.piramidka.restartPiramidka(levels, this.pyramidType);
+        }
       })))
     );
   }

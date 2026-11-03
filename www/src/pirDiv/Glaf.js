@@ -3,7 +3,6 @@ import { ManagerPhysik } from './ManagerPhysik.js';
 import { ManagerMaterials } from './ManagerMaterials.js';
 import { Piramidka } from './piramidka/Piramidka.js';
 import { Menu } from './menu/Menu.js';
-import { ObjectDragging } from './piramidka/ObjectDragging.js';
 
 export class Glaf {
   constructor(par) {
@@ -12,8 +11,9 @@ export class Glaf {
     this.managerMaterials = new ManagerMaterials(this);
     this.managerScan = new ManagerScan(this);
     this.managerPhysik = new ManagerPhysik(this);
-    this.piramidka = new Piramidka(this);
-    this.objectDragging = new ObjectDragging(this);
+    this.piramidka = new Piramidka(this, (s, p, p1) => {
+      console.log('[Glaf] Piramidka event', s, p, p1);
+    });
     this.menu = new Menu(this);
 
     let previousTime = performance.now();

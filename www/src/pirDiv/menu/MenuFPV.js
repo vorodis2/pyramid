@@ -28,7 +28,13 @@ export class MenuFPV {
         pointerEvents: 'none',
         whiteSpace: 'pre-line'
       }
-    }, `FPS: —\nBlocks: ${this.par.par.piramidka.getBlockCount()}`));
+    }, this.getCounterText()));
+  }
+
+  getCounterText(fps = '—') {
+    const bytes = performance.memory?.usedJSHeapSize;
+    const memory = Number.isFinite(bytes) ? (bytes / 1024 ** 2).toFixed(1) + ' MB' : 'N/A';
+    return `FPS: ${fps}\nmemory: ${memory}\nBlocks: ${this.par.par.piramidka.getBlockCount()}`;
   }
 
   update(time) {
@@ -41,7 +47,7 @@ export class MenuFPV {
     this.frames++;
     const elapsed = time - this.previousTime;
     if (elapsed < 1000) return;
-    if (this.counter) this.counter.textContent = `FPS: ${Math.round(this.frames * 1000 / elapsed)}\nBlocks: ${this.par.par.piramidka.getBlockCount()}`;
+    if (this.counter) this.counter.textContent = this.getCounterText(Math.round(this.frames * 1000 / elapsed));
     this.frames = 0;
     this.previousTime = time;
   }
@@ -59,6 +65,6 @@ export class MenuFPV {
     this.element.hidden = !active;
     this.frames = 0;
     this.previousTime = performance.now();
-    if (this.counter) this.counter.textContent = `FPS: —\nBlocks: ${this.par.par.piramidka.getBlockCount()}`;
+    if (this.counter) this.counter.textContent = this.getCounterText();
   }
 }

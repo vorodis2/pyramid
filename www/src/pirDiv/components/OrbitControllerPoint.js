@@ -349,13 +349,13 @@ class OrbitControllerPoint extends Controls {
 		 * ```js
 		 * controls.mouseButtons = {
 		 * 	LEFT: THREE.MOUSE.ROTATE,
-		 * 	MIDDLE: THREE.MOUSE.DOLLY,
+		 * 	MIDDLE: THREE.MOUSE.PAN,
 		 * 	RIGHT: THREE.MOUSE.PAN
 		 * }
 		 * ```
 		 * @type {Object}
 		 */
-		this.mouseButtons = { LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.DOLLY, RIGHT: MOUSE.PAN };
+		this.mouseButtons = { LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.PAN, RIGHT: MOUSE.PAN };
 
 		/**
 		 * This object contains references to the touch actions used by the controls.
@@ -594,6 +594,16 @@ class OrbitControllerPoint extends Controls {
 
 	}
 
+	setOrbitPoint( point ) {
+		const distance = Math.max( this.object.position.distanceTo( point ), 0.001 );
+		this._viewOffset = this.object.getWorldDirection( new Vector3() )
+			.multiplyScalar( distance ).add( this.object.position ).sub( point );
+		this.target.copy( point );
+		this._sphericalDelta.set( 0, 0, 0 );
+		this._panOffset.set( 0, 0, 0 );
+
+	}
+
 	update( deltaTime = null ) {
 
 		const position = this.object.position;
@@ -605,6 +615,8 @@ class OrbitControllerPoint extends Controls {
 
 		// angle from z-axis around y-axis
 		this._spherical.setFromVector3( _v );
+		const previousTheta = this._spherical.theta;
+		const previousPhi = this._spherical.phi;
 
 		if ( this.autoRotate && this.state === _STATE.NONE ) {
 
@@ -694,7 +706,23 @@ class OrbitControllerPoint extends Controls {
 
 		position.copy( this.target ).add( _v );
 
-		this.object.lookAt( this.target );
+		if ( this._viewOffset ) {
+
+			const rotation = new Quaternion().copy( this._quatInverse )
+				.multiply( new Quaternion().setFromAxisAngle( new Vector3( 0, 1, 0 ), this._spherical.theta ) )
+				.multiply( new Quaternion().setFromAxisAngle( new Vector3( 1, 0, 0 ), this._spherical.phi - previousPhi ) )
+				.multiply( new Quaternion().setFromAxisAngle( new Vector3( 0, 1, 0 ), - previousTheta ) )
+				.multiply( this._quat );
+			this._viewOffset.applyQuaternion( rotation );
+			// Preserve the view direction without accumulating roll around it.
+			const viewDirection = this.object.getWorldDirection( new Vector3() ).applyQuaternion( rotation );
+			this.object.lookAt( new Vector3().copy( position ).add( viewDirection ) );
+
+		} else {
+
+			this.object.lookAt( this.target );
+
+		}
 
 		if ( this.enableDamping === true ) {
 
