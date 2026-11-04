@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import * as OIMO from '../node_modules/oimo/build/oimo.module.js';
+import * as OIMO from '../src/physics/PhysicsWorld.js';
 import { Shape } from '../src/pirDiv/piramidka/Blocks/Shape.js';
 import { VisuPhysics } from '../src/pirDiv/piramidka/Blocks/VisuPhysics.js';
 
@@ -22,15 +22,13 @@ block.content3D.rotation.y = 0.8;
 block.visuPhysics.active = true;
 block.shape.createModelPhysics(model);
 assert.equal(block.body, body, 'Collider generation must preserve the body identity');
-assert(body.numShapes > 1 && body.numShapes <= 1000);
+assert.equal(body.numShapes, 1, 'Without parts the whole model must be a single convex hull');
 assert.equal(world.numRigidBodies, 1);
 assert.equal(block.visuPhysics.content3D.children.length, body.numShapes);
 const bounds = new THREE.Box3();
 for (let shape = body.shapes; shape; shape = shape.next) {
-  const centre = new THREE.Vector3().copy(shape.relativePosition);
-  const half = new THREE.Vector3(shape.halfWidth, shape.halfHeight, shape.halfDepth);
-  bounds.expandByPoint(centre.clone().sub(half));
-  bounds.expandByPoint(centre.clone().add(half));
+  assert.equal(shape.type, 'convex');
+  for (const vertex of shape.vertices) bounds.expandByPoint(vertex);
 }
 assert(bounds.min.distanceTo(new THREE.Vector3(-0.5, -0.5, -0.5)) < 0.2);
 assert(bounds.max.distanceTo(new THREE.Vector3(1.25, 0.5, 0.5)) < 0.3);

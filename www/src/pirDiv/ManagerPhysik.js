@@ -1,11 +1,10 @@
-import * as OIMO from 'oimo';
+import * as OIMO from '../physics/PhysicsWorld.js';
 
 export class ManagerPhysik {
   constructor(par) {
     this.par = par;
     this._active = window.localStorage.getItem('physicsActive') !== 'false';
     window.localStorage.setItem('physicsActive', String(this._active));
-    console.warn('Glaf срабоaaaaЙЙЙЙЙЙЙЙЙЙaт1ал');
     this.world = new OIMO.World({
       timestep: 1 / 60,
       iterations: 8,
@@ -19,7 +18,7 @@ export class ManagerPhysik {
     const fixedStep = 1 / 60;
 
     this.update = (delta) => {
-      if (!this.active) {
+      if (!this.active || this.par.piramidka?.loading || this.par.menu?.menuPreloader.active) {
         accumulator = 0;
         return;
       }

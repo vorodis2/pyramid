@@ -43,12 +43,16 @@ export class Manager {
     }
     blockEvent.point = event.point?.clone() ?? null;
     if (event.uv) blockEvent.uv = event.uv.clone();
+    blockEvent.block = null;
+    blockEvent.physic = null;
     let object = event.target;
     while (object) {
       const block = object.userData?.block;
       if (block?.body) {
-        blockEvent.block = block;
-        blockEvent.physic = block.body;
+        if (block.body.isDynamic) {
+          blockEvent.block = block;
+          blockEvent.physic = block.body;
+        }
         break;
       }
       object = object.parent;

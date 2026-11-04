@@ -8,7 +8,7 @@
     "build": "tsc --noEmit && vite build"
   },
   "dependencies": {
-    "oimo": "^1.0.9",
+    "oimophysics": "https://github.com/saharan/OimoPhysics/archive/refs/heads/master.tar.gz",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "three": "^0.180.0"

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { ConvexGeometry } from 'three/addons/geometries/ConvexGeometry.js';
 
 export class VisuPhysics {
   constructor(par) {
@@ -22,7 +23,9 @@ export class VisuPhysics {
     const rotation = new THREE.Matrix4();
     for (let shape = this.par.body.shapes; shape; shape = shape.next) {
       let geometry;
-      if (shape.width !== undefined) {
+      if (shape.type === 'convex') {
+        geometry = new ConvexGeometry(shape.vertices);
+      } else if (shape.width !== undefined) {
         geometry = new THREE.BoxGeometry(shape.width * scale, shape.height * scale, shape.depth * scale);
       } else if (shape.radius !== undefined && shape.height !== undefined) {
         geometry = new THREE.CylinderGeometry(shape.radius * scale, shape.radius * scale, shape.height * scale, 16);

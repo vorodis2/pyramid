@@ -12,10 +12,8 @@ export class Model {
     const container = block.content3D;
     const shape = block.shape.arrShapes[0];
     const targetSize = new THREE.Vector3(shape.size[0], shape.size[1] ?? shape.size[0], shape.size[2] ?? shape.size[0]);
-    return new GLTFLoader().loadAsync(block.source).then(async (gltf) => {
+    return new GLTFLoader().loadAsync(block.source).then((gltf) => {
       const model = gltf.scene;
-      // TEMP: simulate independent model loading times for the preloader demo.
-      await new Promise((resolve) => setTimeout(resolve, 500 + Math.random() * 1500));
       // A removed/reinitialized block must not receive a late model response.
       if (block.content3D !== container) {
         disposeObject(model);
@@ -30,6 +28,8 @@ export class Model {
       model.position.add(block.shape.arrShapePositions[0]);
       model.traverse((object) => {
         if (!object.isMesh) return;
+        object.castShadow = true;
+        object.receiveShadow = true;
         object.userData.block = block;
         object.userData.type = shape.type;
       });

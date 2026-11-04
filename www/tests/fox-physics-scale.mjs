@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import * as THREE from 'three';
-import * as OIMO from '../node_modules/oimo/build/oimo.module.js';
+import * as OIMO from '../src/physics/PhysicsWorld.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Shape } from '../src/pirDiv/piramidka/Blocks/Shape.js';
 import { VisuPhysics } from '../src/pirDiv/piramidka/Blocks/VisuPhysics.js';
@@ -39,17 +39,49 @@ block.content3D.add(model);
 block.shape.createModelPhysics(model);
 const physicsBounds = new THREE.Box3();
 for (let shape = block.body.shapes; shape; shape = shape.next) {
-  const centre = new THREE.Vector3().copy(shape.relativePosition);
-  const half = new THREE.Vector3(shape.halfWidth, shape.halfHeight, shape.halfDepth);
-  physicsBounds.expandByPoint(centre.clone().sub(half));
-  physicsBounds.expandByPoint(centre.clone().add(half));
+  assert.equal(shape.type, 'convex');
+  for (const vertex of shape.vertices) physicsBounds.expandByPoint(vertex);
 }
 const physicalSize = physicsBounds.getSize(new THREE.Vector3());
 const visualSize = new THREE.Box3().setFromObject(model, true).getSize(new THREE.Vector3());
 assert(Math.abs(Math.max(visualSize.x, visualSize.y, visualSize.z) - 1) < 1e-4);
 for (const axis of ['x', 'y', 'z']) {
   assert(physicalSize[axis] >= visualSize[axis] * 0.95, 'Physics must cover the visible Fox');
-  assert(physicalSize[axis] <= visualSize[axis] + 0.21, 'Voxel expansion must remain bounded');
+  assert(Math.abs(physicalSize[axis] - visualSize[axis]) < 1e-4, 'Hull bounds must match the visible geometry');
 }
+assert.equal(block.body.numShapes, 1);
+block.shape.arrShapes[0].parts = 1;
+block.shape.createModelPhysics(model);
+assert.equal(block.body.numShapes, 1, 'Explicit parts: 1 must keep a single hull');
+block.shape.arrShapes[0].parts = 5;
+const started = performance.now();
+block.shape.createModelPhysics(model);
+assert.equal(block.body.numShapes, 5, 'Fox must split into five convex shapes');
+assert.equal(world.numRigidBodies, 1, 'Parts must remain one physical body');
+for (let frame = 0; frame < 20; frame++) world.step();
+assert(Number.isFinite(block.body.getPosition().y));
+console.log('PASS: Fox decomposition into five convex parts in', Math.round(performance.now() - started), 'ms');
+block.shape.arrShapes[0].primitiveParts = 10;
+block.visuPhysics.active = true;
+block.shape.createModelPhysics(model);
+assert.equal(block.body.numShapes, 10, 'Primitive mode must fit ten simple shapes to the Fox');
+assert.equal(world.numRigidBodies, 1);
+const primitiveBounds = new THREE.Box3();
+for (const shape of block.body.arrShapes) {
+  assert.equal(shape.type, 'box');
+  assert.equal(shape.vertices, null, 'Primitive mode must not use convex mesh colliders');
+  assert(shape.native.getGeometry().constructor.name.includes('BoxGeometry'));
+  const center = new THREE.Vector3().copy(shape.relativePosition);
+  const half = new THREE.Vector3(shape.halfWidth, shape.halfHeight, shape.halfDepth);
+  primitiveBounds.expandByPoint(center.clone().sub(half));
+  primitiveBounds.expandByPoint(center.clone().add(half));
+}
+assert(primitiveBounds.getSize(new THREE.Vector3()).distanceTo(visualSize) < 1e-4);
+assert.equal(block.visuPhysics.content3D.children.length, 10);
+for (const mesh of block.visuPhysics.content3D.children) assert.equal(mesh.geometry.type, 'BoxGeometry');
+for (let frame = 0; frame < 20; frame++) world.step();
+assert(Number.isFinite(block.body.getPosition().y));
+block.visuPhysics.dispose();
+console.log('PASS: Fox fitted with ten native box shapes, matching bounds and debug primitives');
 block.body.remove();
 console.log('PASS: actual skinned Fox visual and collider scales match:', physicalSize.toArray());

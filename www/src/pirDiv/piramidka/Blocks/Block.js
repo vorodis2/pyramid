@@ -4,6 +4,7 @@ import { Model } from './Model.js';
 import { disposeObject } from './disposeObject.js';
 import { BStatus } from './BStatus.js';
 import { VisuPhysics } from './VisuPhysics.js';
+import { BTitle } from './BTitle.js';
 
 export class Block {
   constructor(par) {
@@ -20,11 +21,12 @@ export class Block {
       this.boolLoad = false;
       this.loadError = null;
       this.modelReady = null;
-      const { object3D = null, ...shapeOptions } = options;
+      const { object3D = null, bTitle = null, ...shapeOptions } = options;
       this.source = object3D?.src ?? null;
       this.content3D = new THREE.Object3D();
       this.par.content3D.add(this.content3D);
       this.body = this.shape.initialize(shapeOptions);
+      this.bTitle = bTitle ? new BTitle(this, bTitle) : null;
       this.update();
       window.visi3D.addChildMouse(this.content3D);
       this.visuPhysics.active = this.par.debugPhysics;
@@ -41,10 +43,13 @@ export class Block {
       if (!this.body) return;
       this.content3D.position.copy(this.body.getPosition());
       this.content3D.quaternion.copy(this.body.getQuaternion());
+      this.bTitle?.update();
     };
 
     this.delete = () => {
       this.boolLoad = false;
+      this.bTitle?.dispose();
+      this.bTitle = null;
       if (!this.content3D) return;
       this.bStatus.dispose();
       this.visuPhysics.dispose();
@@ -55,11 +60,7 @@ export class Block {
       }
       this.content3D.removeFromParent();
       disposeObject(this.content3D);
-      // Oimo removes the body's proxies but leaves overlapping contacts alive.
-      // Detach them first so old bodies cannot remain in the solver's islands.
-      while (this.body.contactLink) {
-        this.par.world.removeContact(this.body.contactLink.contact);
-      }
+      // OimoPhysics removes the body and its contacts together.
       this.body.remove();
       this.body = null;
       this.content3D = null;

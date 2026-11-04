@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import * as OIMO from 'oimo';
+import * as OIMO from '../physics/PhysicsWorld.js';
 import { Piramidka } from './Piramidka';
 import type { PhysicsBody } from './Block';
 import { Menu } from './menu/Menu';

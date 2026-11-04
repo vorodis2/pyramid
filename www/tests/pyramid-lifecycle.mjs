@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import * as OIMO from '../node_modules/oimo/build/oimo.module.js';
+import * as OIMO from '../src/physics/PhysicsWorld.js';
 import { Piramidka } from '../src/pirDiv/piramidka/Piramidka.js';
 
 const storage = new Map();

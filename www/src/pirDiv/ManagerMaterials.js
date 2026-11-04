@@ -6,9 +6,10 @@ export class ManagerMaterials {
     window.managerMaterial = this;
 
     const arrVariants = [
-      { color: 0xff0000, metalness: 0.35, roughness: 0.25 },
-      { color: 0xff6b8a, metalness: 0.15, roughness: 0.4 },
-      { color: 0xffc857, metalness: 0.55, roughness: 0.3 }
+      { color: 0xb82c16, metalness: 0.04, roughness: 0.38 },
+      { color: 0xf2dfb9, metalness: 0.03, roughness: 0.5 },
+      { color: 0xc99a52, metalness: 0.3, roughness: 0.36 },
+      { color: 0xf8ead2, metalness: 0.02, roughness: 0.48 }
     ];
     let index = 0;
 

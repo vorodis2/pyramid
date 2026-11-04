@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import * as OIMO from '../node_modules/oimo/build/oimo.module.js';
+import * as OIMO from '../src/physics/PhysicsWorld.js';
 import { VisuPhysics } from '../src/pirDiv/piramidka/Blocks/VisuPhysics.js';
 import { BStatus } from '../src/pirDiv/piramidka/Blocks/BStatus.js';
 

@@ -31,7 +31,8 @@ function pyramidTypes({ param, initialType, onChange }) {
   const arrTypes = [
     { type: 'base', label: 'Horizontal pyramid', path: 'M3 17h4v4H3z M8 17h4v4H8z M13 17h4v4h-4z M18 17h4v4h-4z M5.5 12h4v4h-4z M10.5 12h4v4h-4z M15.5 12h4v4h-4z M8 7h4v4H8z M13 7h4v4h-4z M10.5 2h4v4h-4z' },
     { type: 'wide', label: 'Wide pyramid', path: 'M12 2 22 17 12 22 2 17Z M12 2v20 M2 17l10-5 10 5 M5 12l7-3 7 3 M8 7l4-2 4 2' },
-    { type: 'spiral', label: 'Spiral pyramid', path: 'M3 18a9 4 0 1 0 18 0 9 4 0 1 0-18 0 M5 13a7 3 0 1 0 14 0 7 3 0 1 0-14 0 M8 8a4 2 0 1 0 8 0 4 2 0 1 0-8 0 M12 2v4' }
+    { type: 'spiral', label: 'Spiral pyramid', path: 'M3 18a9 4 0 1 0 18 0 9 4 0 1 0-18 0 M5 13a7 3 0 1 0 14 0 7 3 0 1 0-14 0 M8 8a4 2 0 1 0 8 0 4 2 0 1 0-8 0 M12 2v4' },
+    { type: 'random', label: 'Random pieces pyramid', path: 'M2 17h7v5H2z M9 17h5v5H9z M14 17h8v5h-8z M5 11h9v6H5z M14 11h5v6h-5z M8 5h5v6H8z M13 5h3v6h-3z M10 1h4v4h-4z' }
   ];
   return createElement('div', {
     role: 'group', 'aria-label': 'Pyramid layout',

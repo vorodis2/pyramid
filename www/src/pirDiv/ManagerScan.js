@@ -1,6 +1,10 @@
 import * as THREE from 'three';
 import * as TWEEN from 'three/addons/libs/tween.module.js';
 import { MVisi3D } from '../visi3D/MVisi3D.js';
+import { LightRays } from './components/LightRays.js';
+import { StudioStage } from './components/StudioStage.js';
+import { StudioEffects } from './components/StudioEffects.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 export class ManagerScan {
   constructor(par) {
@@ -21,10 +25,12 @@ export class ManagerScan {
     this.visi3D.position3d.maxZum = 100;
     this.visi3D.position3d.powerZum = 15;
     this.visi3D.position3d.pScane.active = true;
-    this.visi3D.fov = 55;
-    this.visi3D.zume = Math.hypot(8, 7, 15);
-    this.visi3D.rotationX = Math.acos(7 / this.visi3D.zume);
-    this.visi3D.rotationZ = Math.atan2(8, 15);
+    this.visi3D.fov = 42;
+    this.visi3D.zume = 27;
+    this.visi3D.rotationX = 1.15;
+    this.visi3D.rotationZ = 0.4;
+    this.visi3D.xVerh = 1;
+    this.visi3D.yVerh = -1.7;
     const sceneStorageKey = 'visi3DScene';
     try {
       const savedScene = JSON.parse(window.localStorage.getItem(sceneStorageKey));
@@ -53,8 +59,41 @@ export class ManagerScan {
     this.camera.near = 0.1;
     this.camera.far = 100;
     this.camera.updateProjectionMatrix();
-    this.scene.background = new THREE.Color(0xdce7f2);
+    this.scene.background = new THREE.Color(0x100d0b);
     this.renderer = this.visi3D.renderer;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.05;
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    const room = new RoomEnvironment();
+    this.environmentTarget = pmrem.fromScene(room, 0.04);
+    this.scene.environment = this.environmentTarget.texture;
+    this.scene.environmentIntensity = 0.35;
+    room.dispose();
+    pmrem.dispose();
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.visi3D.sunLight.visible = false;
+    this.visi3D.sunLight.castShadow = false;
+    this.visi3D.sunLight.shadow.map?.dispose();
+    this.visi3D.sunLight.shadow.map = null;
+    this.visi3D.ambientLight.intensity = 0.12;
+    this.sunLight = new THREE.DirectionalLight(0xffd9a3, 4.5);
+    this.sunLight.position.set(-7, 15, 7);
+    this.sunLight.target.position.set(1, 0, 0);
+    this.sunLight.castShadow = true;
+    this.sunLight.shadow.mapSize.set(2048, 2048);
+    Object.assign(this.sunLight.shadow.camera, {
+      left: -20, right: 20, top: 20, bottom: -20, near: 0.5, far: 60
+    });
+    this.sunLight.shadow.camera.updateProjectionMatrix();
+    this.sunLight.shadow.bias = -0.0002;
+    this.sunLight.shadow.normalBias = 0.025;
+    this.sunLight.shadow.radius = 2;
+    this.scene.add(this.sunLight, this.sunLight.target);
+    this.scene.fog = new THREE.FogExp2(0x100d0b, 0.014);
+    this.lightRays = new LightRays(this.scene, this.sunLight);
+    this.studioStage = new StudioStage(this.scene);
+    this.visi3D.efect = new StudioEffects(this.renderer, this.scene, this.camera);
     this.renderer.domElement.style.zIndex = '0';
     this.renderer.domElement.style.display = 'block';
     this.renderer.domElement.style.touchAction = 'none';
@@ -75,9 +114,9 @@ export class ManagerScan {
     });
     this.mirrorCamera = new THREE.CubeCamera(0.05, 100, this.mirrorTarget);
     this.mirrorMaterial = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
+      color: 0xe9ae36,
       metalness: 1,
-      roughness: 0,
+      roughness: 0.15,
       envMap: this.mirrorTarget.texture
     });
     this.mirrorObject = null;
@@ -108,7 +147,7 @@ export class ManagerScan {
       this.visi3D.position3d.stageUpNew();
     });
 
-    this.scene.add(new THREE.HemisphereLight(0xffffff, 0x778899, 2));
+    this.scene.add(new THREE.HemisphereLight(0xb8c4dc, 0x281b10, 0.3));
 
     this.resize = () => {
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -122,6 +161,10 @@ export class ManagerScan {
       if (this.mirrorObject) {
         const background = this.scene.background;
         const visible = this.mirrorObject.visible;
+        const raysVisible = this.lightRays.content3D.visible;
+        this.lightRays.content3D.visible = false;
+        const shadowAutoUpdate = this.renderer.shadowMap.autoUpdate;
+        this.renderer.shadowMap.autoUpdate = false;
         this.mirrorObject.getWorldPosition(this.mirrorCamera.position);
         this.mirrorObject.visible = false;
         if (this.reflectionBackground) this.scene.background = this.reflectionBackground;
@@ -129,6 +172,8 @@ export class ManagerScan {
           this.mirrorCamera.update(this.renderer, this.scene);
         } finally {
           this.mirrorObject.visible = visible;
+          this.lightRays.content3D.visible = raysVisible;
+          this.renderer.shadowMap.autoUpdate = shadowAutoUpdate;
           this.scene.background = background;
         }
       }

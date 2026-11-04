@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <radialGradient id="sphere" cx="32%" cy="25%"><stop stop-color="#c9e5ff"/><stop offset=".55" stop-color="#729bc4"/><stop offset="1" stop-color="#354e70"/></radialGradient>
+    <linearGradient id="cylinder"><stop stop-color="#b16b27"/><stop offset=".45" stop-color="#ffcd79"/><stop offset="1" stop-color="#d58c3e"/></linearGradient>
+  </defs>
+  <ellipse cx="128" cy="220" rx="112" ry="19" fill="#334155" opacity=".14"/>
+  <circle cx="86" cy="83" r="65" fill="url(#sphere)"/>
+  <path d="M155 80v99c0 24 81 24 81 0V80" fill="url(#cylinder)"/>
+  <ellipse cx="195.5" cy="80" rx="40.5" ry="17" fill="#ffda96"/>
+  <path d="m23 151 62-31 62 31-62 32Z" fill="#a9bfd5"/>
+  <path d="m23 151 62 32v60l-62-32Z" fill="#627e9f"/>
+  <path d="m85 183 62-32v60l-62 32Z" fill="#405976"/>
+</svg>

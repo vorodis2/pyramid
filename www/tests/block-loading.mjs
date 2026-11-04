@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import * as OIMO from '../node_modules/oimo/build/oimo.module.js';
+import * as OIMO from '../src/physics/PhysicsWorld.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Piramidka } from '../src/pirDiv/piramidka/Piramidka.js';
 import { Block } from '../src/pirDiv/piramidka/Blocks/Block.js';
@@ -40,12 +40,8 @@ try {
   assert.equal(pending.loaded, 0);
   assert.equal(pending.percent, 0);
   const initialRequests = arrRequests.length;
-  const started = performance.now();
   for (const request of arrRequests) request.resolve(model());
-  await Promise.resolve();
-  assert.equal(firstFox.boolLoad, false, 'Simulated loading must remain pending during the delay');
   await Promise.all(arrModels.map((block) => block.modelReady));
-  assert(performance.now() - started >= 490, 'Temporary delay must be at least half a second');
   assert.equal(firstFox.boolLoad, true);
   firstFox.content3D.traverse((object) => {
     if (object.isMesh) assert.equal(object.userData.block, firstFox);
