@@ -1,0 +1,11 @@
+.menu-block-delete {
+  border: 1px solid #c9d3df;
+  background: transparent;
+  color: var(--button-color);
+  transition: background-color 150ms;
+}
+
+.menu-block-delete:hover,
+.menu-block-delete:focus-visible {
+  background: rgba(0, 0, 0, 0.06);
+}

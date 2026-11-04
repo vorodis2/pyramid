@@ -147,6 +147,30 @@ export class MenuD1 {
       createElement('path', { d: 'M7 13V10M12 13V7M17 13V9M12 17v4M8 21h8' }))),
       createElement('button', {
         type: 'button',
+        title: 'Show/hide physics shapes',
+        'aria-label': 'Show/hide physics shapes',
+        ref: (element) => {
+          this.debugPhysicsButton = element;
+          this.updateDebugPhysicsButton(this.par.par.par.piramidka.debugPhysics);
+        },
+        onClick: () => {
+          const pyramid = this.par.par.par.piramidka;
+          pyramid.debugPhysics = !pyramid.debugPhysics;
+        },
+        style: {
+          width: this.param.wh, height: this.param.wh, flexShrink: 0,
+          boxSizing: 'border-box', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', padding: this.param.otstup, cursor: 'pointer',
+          transition: `color ${this.param.timeAnimation}s ease-in-out`
+        }
+      }, createElement('svg', {
+        viewBox: '0 0 24 24', width: 20, height: 20, fill: 'none',
+        stroke: 'currentColor', strokeWidth: 1.5, strokeLinejoin: 'round', 'aria-hidden': true
+      }, createElement('path', {
+        d: 'M12 2 22 7v10l-10 5-10-5V7Z M2 7l10 5 10-5 M12 12v10 M12 2v10 M2 17l10-5 10 5'
+      }))),
+      createElement('button', {
+        type: 'button',
         title: 'Enable/disable physics',
         'aria-label': 'Enable/disable physics',
         ref: (element) => {
@@ -176,5 +200,11 @@ export class MenuD1 {
     if (!this.physicsButton) return;
     this.physicsButton.style.color = active ? this.param.colorActive : this.param.color;
     this.physicsButton.setAttribute('aria-pressed', String(active));
+  }
+
+  updateDebugPhysicsButton(active) {
+    if (!this.debugPhysicsButton) return;
+    this.debugPhysicsButton.style.color = active ? this.param.colorActive : this.param.color;
+    this.debugPhysicsButton.setAttribute('aria-pressed', String(active));
   }
 }

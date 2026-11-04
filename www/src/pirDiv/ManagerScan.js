@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as TWEEN from 'three/addons/libs/tween.module.js';
 import { MVisi3D } from '../visi3D/MVisi3D.js';
 
@@ -45,7 +44,7 @@ export class ManagerScan {
       sceneChangeTimer = setTimeout(() => {
         const sceneState = this.visi3D.getObj();
         window.localStorage.setItem(sceneStorageKey, JSON.stringify(sceneState));
-        console.log('[ManagerScan] Visi3D scene saved', sceneState);
+        
       }, 1000);
     };
     this.visi3D.arrFunDrag.push(this.traceSceneChange);
@@ -59,24 +58,6 @@ export class ManagerScan {
     this.renderer.domElement.style.zIndex = '0';
     this.renderer.domElement.style.display = 'block';
     this.renderer.domElement.style.touchAction = 'none';
-
-    this.foxModel = null;
-    this.foxReady = new GLTFLoader().loadAsync(
-      new URL('../../resources/models/Fox.glb', import.meta.url).href
-    ).then((gltf) => {
-      const model = gltf.scene;
-      const bounds = new THREE.Box3().setFromObject(model);
-      const size = bounds.getSize(new THREE.Vector3());
-      const center = bounds.getCenter(new THREE.Vector3());
-      const scale = 3 / Math.max(size.x, size.y, size.z);
-      model.scale.setScalar(scale);
-      model.position.set(-9 - center.x * scale, -bounds.min.y * scale, 3 - center.z * scale);
-      this.content3d.add(model);
-      this.visi3D.addChildMouse(model);
-      this.foxModel = model;
-    }).catch((error) => {
-      console.error('[ManagerScan] Could not load decorative fox', error);
-    });
 
     this.reflectionBackground = null;
     new THREE.TextureLoader().load(

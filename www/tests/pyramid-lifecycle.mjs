@@ -25,7 +25,13 @@ const scan = {
   }
 };
 window.visi3D = scan.visi3D;
-const pyramid = new Piramidka({ managerPhysik: { world }, managerScan: scan });
+const arrEvents = [];
+const pyramid = new Piramidka({ managerPhysik: { world }, managerScan: scan },
+  (name, event) => {
+    if (name !== 'blockEventActive') return;
+    pyramid.manager.blockEventActive = event;
+    arrEvents.push({ name, event });
+  });
 let geometries = 0;
 let materials = 0;
 const trackDisposal = () => {
@@ -40,6 +46,27 @@ const trackDisposal = () => {
 trackDisposal();
 
 try {
+  const selected = pyramid.arrPiramidka[0];
+  const selectedContent = selected.content3D;
+  const previousCount = pyramid.getBlockCount();
+  for (let body = world.rigidBodies; body; body = body.next) {
+    if (body.isDynamic) body.sleep();
+  }
+  pyramid.manager.blockEventActive = pyramid.manager.getEventBlock({target: selected.content3D.children[0]});
+  pyramid.removeBlock(selected);
+  for (let body = world.rigidBodies; body; body = body.next) {
+    if (body.isDynamic) assert.equal(body.sleeping, false, 'Remaining bodies must wake after deletion');
+  }
+  assert.equal(pyramid.getBlockCount(), previousCount - 1);
+  assert(!pyramid.arrPiramidka.includes(selected));
+  assert(!mouseObjects.has(selectedContent));
+  assert.equal(selected.body, null);
+  assert.equal(pyramid.manager.blockEventActive.block, null);
+  assert.equal(arrEvents.length, 1);
+  assert.equal(arrEvents[0].name, 'blockEventActive');
+  assert.equal(arrEvents[0].event.block, null);
+  pyramid.removeBlock(selected);
+  assert.equal(arrEvents.length, 1);
   for (const type of ['base', 'wide', 'spiral']) {
     for (let cycle = 0; cycle < 8; cycle++) {
       pyramid.restartPiramidka(5, type);

@@ -1,0 +1,45 @@
+import assert from 'node:assert/strict';
+import * as THREE from 'three';
+import * as OIMO from '../node_modules/oimo/build/oimo.module.js';
+import { Shape } from '../src/pirDiv/piramidka/Blocks/Shape.js';
+import { VisuPhysics } from '../src/pirDiv/piramidka/Blocks/VisuPhysics.js';
+
+const world = new OIMO.World({ worldscale: 1, gravity: [0, 0, 0] });
+const block = { par: { world }, content3D: new THREE.Group() };
+block.shape = new Shape(block);
+block.visuPhysics = new VisuPhysics(block);
+block.body = block.shape.initialize({ array: [{ type: 'model', size: [1, 1, 1] }], move: true });
+const body = block.body;
+const model = new THREE.Group();
+const material = new THREE.MeshBasicMaterial();
+const a = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
+const b = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), material);
+b.position.set(1, 0.25, 0);
+model.add(a, b);
+block.content3D.add(model);
+block.content3D.position.set(4, 2, -3);
+block.content3D.rotation.y = 0.8;
+block.visuPhysics.active = true;
+block.shape.createModelPhysics(model);
+assert.equal(block.body, body, 'Collider generation must preserve the body identity');
+assert(body.numShapes > 1 && body.numShapes <= 1000);
+assert.equal(world.numRigidBodies, 1);
+assert.equal(block.visuPhysics.content3D.children.length, body.numShapes);
+const bounds = new THREE.Box3();
+for (let shape = body.shapes; shape; shape = shape.next) {
+  const centre = new THREE.Vector3().copy(shape.relativePosition);
+  const half = new THREE.Vector3(shape.halfWidth, shape.halfHeight, shape.halfDepth);
+  bounds.expandByPoint(centre.clone().sub(half));
+  bounds.expandByPoint(centre.clone().add(half));
+}
+assert(bounds.min.distanceTo(new THREE.Vector3(-0.5, -0.5, -0.5)) < 0.2);
+assert(bounds.max.distanceTo(new THREE.Vector3(1.25, 0.5, 0.5)) < 0.3);
+for (let frame = 0; frame < 30; frame++) world.step();
+assert(Number.isFinite(body.position.x));
+block.visuPhysics.dispose();
+body.remove();
+a.geometry.dispose();
+b.geometry.dispose();
+material.dispose();
+assert.equal(world.numRigidBodies, 0);
+console.log('PASS: model geometry generates compound colliders, preserves local coordinates and rebuilds debug shapes');

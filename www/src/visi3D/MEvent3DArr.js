@@ -385,6 +385,8 @@ export default function MEvent3DArr (par, camera, contentHTML, stage) {
 		else self.event = e;
 		
 		self.restartPoint(e,pV);
+		self.parent.scene.updateMatrixWorld(true);
+		self.mouseRay();
 
 
 		if(self.isFunNa("down", e)==true)return

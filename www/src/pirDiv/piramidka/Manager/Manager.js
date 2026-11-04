@@ -1,19 +1,38 @@
 import { EventBlocks } from '../Blocks/EventBlocks.js';
+import { Dragger } from './Dragger.js';
 
 export class Manager {
   constructor(par, fun) {
     this.par = par;
     this.fun = fun;
-    this._blockActive = null;
+    this._blockEventActive = null;
+    this.dragger = new Dragger(this);
     this.visi3D = this.par.par.managerScan.visi3D;
     this.down = (event) => {
-      //console.log('----',event );
-      const blockEvent = this.getEventBlock(event);
-      this.blockActive = blockEvent.block;
-      
-      return blockEvent;
+        
+        const blockE = this.getEventBlock(event);
+        
+        if ((this._blockEventActive?.block ?? null) !== blockE.block) {            
+            
+            this.fun('blockEventActive', blockE);
+        } else {
+            this.blockEventActive = blockE;
+        }
+        return blockE;
     };
     this.visi3D.addEvent('down', this.down);
+    this.over = (event) => {
+      const blockEvent = this.getEventBlock(event);
+      this.fun('blockEventOver', blockEvent);
+      return blockEvent;
+    };
+    this.out = (event) => {
+      const blockEvent = this.getEventBlock(event);
+      this.fun('blockEventOut', blockEvent);
+      return blockEvent;
+    };
+    this.visi3D.addEvent('over', this.over);
+    this.visi3D.addEvent('out', this.out);
   }
 
   getEventBlock(event) {
@@ -37,14 +56,13 @@ export class Manager {
     return blockEvent;
   }
 
-  get blockActive() {
-    return this._blockActive;
+  get blockEventActive() {
+    return this._blockEventActive;
   }
 
-  set blockActive(value) {
-    if (this._blockActive === value) return;
-    this._blockActive = value;
-    this.fun('blockActive', this._blockActive);
-    
+  set blockEventActive(value) {
+    if (this._blockEventActive === value) return;
+    this._blockEventActive = value;
+    this.dragger.blockEventActive = value;
   }
 }
