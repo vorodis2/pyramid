@@ -8,7 +8,7 @@ export class Param {
     this.param.colorActive = '#ff0000';
 
     this.param.colorFont = '#777777';
-    this.param.colorFontActive = '#00ffff';
+    this.param.colorFontActive = '#222222';
     this.param.color1 = '#999999';
    
 

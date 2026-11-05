@@ -1,4 +1,6 @@
 import { createSpiderShapes } from './Spider.js';
+import * as THREE from 'three';
+import { createAssistantCharacter } from './AssistantCharacter.js';
 
 export class PCreate {
   constructor(par, addBlock) {
@@ -72,21 +74,35 @@ export class PCreate {
         move: true, density: 1, friction: 0.6, restitution: 0.05
       });
     }
-    this.par.restartPiramidka(this.par.levels, this.par.type);
-    ///1
+    const assistantX = 5.5;
+    const assistantZ = -9.5;
+    for (let i = 0; i < cylinderCount; i++) {
+      this.addBlock({
+        color: i % 2 === 0 ? 0x625446 : 0x53473c,
+        array: [{ type: 'cylinder', size: [1.3, cylinderHeight, 1.3], segments: 64, bevel: 0.05 }],
+        pos: [assistantX, groundY + cylinderHeight * (i + 0.5), assistantZ],
+        rot: [0, 40, 0],
+        move: true, density: 1, friction: 0.6, restitution: 0.05
+      });
+    }
+    const assistant = createAssistantCharacter();
+    const assistantPosition = assistant.center.clone()
+      .applyAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(310))
+      .add(new THREE.Vector3(assistantX, groundY + cylinderCount * cylinderHeight + 0.02, assistantZ));
     this.addBlock({
-      object3D: {
-        src: new URL('../../../resources/models/Fox.glb', import.meta.url).href
+      bTitle: {
+        position: new THREE.Vector3(0, 2.62, 0).sub(assistant.center).toArray(),
+        title: 'GPT • Coding Assistant',
+        text: 'GPT helped me build this scene: write and debug code, set up compound physics, create characters, and refine menus, tooltips and layout.',
+        src: new URL('../../../resources/assistant-character-transparent.png', import.meta.url).href
       },
-      color: 0xffc857,
-      array: [
-        { type: 'model', size: [1, 1, 1] }
-      ],
-      pos: [9, 0.5, -3],
-      move: true, density: 1, friction: 0.5, restitution: 0.05
+      color: 0x287c78,
+      array: assistant.arrShapes,
+      pos: assistantPosition.toArray(),
+      rot: [0, 310, 0],
+      move: true, density: 1, friction: 0.6, restitution: 0.05
     });
-
-    //2
+    this.par.restartPiramidka(this.par.levels, this.par.type);
     this.addBlock({
       bTitle: {
         position: [0, 0.43, 0],
@@ -103,19 +119,6 @@ export class PCreate {
       ],
       pos: [-7, 3.04, -6],
       rot: [0, 40, 0],
-      move: true, density: 1, friction: 0.5, restitution: 0.05
-    });
-
-    //3
-    this.addBlock({
-      object3D: {
-        src: new URL('../../../resources/models/Fox.glb', import.meta.url).href
-      },
-      color: 0xffc857,
-      array: [
-        { type: 'model', size: [1, 1, 1], primitiveParts: 10 }
-      ],
-      pos: [9, 0.5, 3],
       move: true, density: 1, friction: 0.5, restitution: 0.05
     });
 

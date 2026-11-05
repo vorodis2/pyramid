@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
+    "preview": "vite preview --host",
     "build": "tsc --noEmit && vite build"
   },
   "dependencies": {

@@ -5,8 +5,8 @@ export class MenuFPV {
   constructor(par) {
     this.par = par;
     this.param = window.param;
-    this._active = window.localStorage.getItem('menuFPV') !== 'false';
-    window.localStorage.setItem('menuFPV', String(this._active));
+    this._active = window.localStorage.getItem('menuFPV.v2') === 'true';
+    window.localStorage.setItem('menuFPV.v2', String(this._active));
     this.frames = 0;
     this.previousTime = performance.now();
     this.element = document.createElement('div');
@@ -23,8 +23,8 @@ export class MenuFPV {
         padding: this.param.otstup,
         borderRadius: '5px',
         background: 'rgba(255, 255, 255, 0.92)',
-        color: this.param.color,
-        font: '12px/1.2 monospace',
+        color: this.param.colorFont,
+        font: `${this.param.fontSizeLittel}px/1.2 monospace`,
         pointerEvents: 'none',
         whiteSpace: 'pre-line'
       }
@@ -34,7 +34,7 @@ export class MenuFPV {
   getCounterText(fps = '—') {
     const bytes = performance.memory?.usedJSHeapSize;
     const memory = Number.isFinite(bytes) ? (bytes / 1024 ** 2).toFixed(1) + ' MB' : 'N/A';
-    return `FPS: ${fps}\nmemory: ${memory}\nBlocks: ${this.par.par.piramidka.getBlockCount()}`;
+    return `FPS: ${fps}\nMemory: ${memory}\nBlocks: ${this.par.par.piramidka.getBlockCount()}`;
   }
 
   update(time) {
@@ -60,7 +60,7 @@ export class MenuFPV {
     const active = Boolean(value);
     if (this._active === active) return;
     this._active = active;
-    window.localStorage.setItem('menuFPV', String(active));
+    window.localStorage.setItem('menuFPV.v2', String(active));
     this.par.menuDebager.menuD1.updateFPVButton(active);
     this.element.hidden = !active;
     this.frames = 0;

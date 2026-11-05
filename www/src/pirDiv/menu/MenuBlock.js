@@ -24,7 +24,8 @@ export class MenuBlock {
         borderRadius: '5px',
         background: 'rgba(255, 255, 255, 0.92)',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-        font: '14px sans-serif'
+        font: `${this.param.fontSize}px sans-serif`,
+        color: this.param.colorFont
       }
     }, createElement('button', {
       type: 'button',
@@ -32,8 +33,8 @@ export class MenuBlock {
       onClick: () => {
         if (this.block) this.par.par.piramidka.removeBlock(this.block);
       },
-      title: 'Удалить',
-      'aria-label': 'Удалить',
+      title: 'Delete object',
+      'aria-label': 'Delete object',
       style: {
         width: this.param.wh,
         height: this.param.wh,

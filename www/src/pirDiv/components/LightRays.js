@@ -6,10 +6,14 @@ export class LightRays {
     this.content3D.name = 'Light rays';
     scene.add(this.content3D);
     const direction = light.target.position.clone().sub(light.position).normalize();
-    const length = 24;
+    const length = 24 * 1.5;
+    const radius = 3.2 * 0.8;
+    const offset = light.position.clone().sub(light.target.position);
+    offset.y = 0;
+    offset.normalize().multiplyScalar(radius);
     const geometry = new THREE.CylinderGeometry(1, 1, 2, 24);
     const arrBeams = [
-      { end: [1, 0, 0], radius: 3.2 }
+      { end: light.target.position.clone().add(offset).toArray(), radius }
     ];
     for (const beam of arrBeams) {
       const uniforms = {
@@ -23,6 +27,7 @@ export class LightRays {
       };
       const material = new THREE.ShaderMaterial({
         uniforms, transparent: true, depthWrite: false, side: THREE.BackSide,
+        blending: THREE.AdditiveBlending,
         vertexShader: `
           varying vec3 localPosition;
           void main() {
@@ -75,23 +80,27 @@ export class LightRays {
             }
             enter = max(enter, 0.0);
             if (leave <= enter) discard;
-            float stepSize = (leave - enter) / 12.0;
+            float stepSize = (leave - enter) / 24.0;
             float density = 0.0;
-            for (int i = 0; i < 12; i++) {
+            for (int i = 0; i < 24; i++) {
               vec3 p = localCamera + ray * (enter + (float(i) + 0.5) * stepSize);
-              float radial = pow(max(0.0, 1.0 - dot(p.xz, p.xz)), 2.0);
-              float ends = smoothstep(-1.0, -0.75, p.y) * (1.0 - smoothstep(0.7, 1.0, p.y));
-              density += radial * ends * illumination(p);
+              float radial = pow(max(0.0, 1.0 - dot(p.xz, p.xz)), 3.0);
+              float ends = smoothstep(-1.0, -0.45, p.y) * (1.0 - smoothstep(0.45, 1.0, p.y));
+              // Fade out above the podium instead of exposing the cylinder's cut.
+              float heightFade = smoothstep(0.25, 3.5, (beamWorld * vec4(p, 1.0)).y);
+              density += radial * ends * heightFade * illumination(p);
             }
             float alpha = 1.0 - exp(-density * stepSize * length(ray * beamScale) * 0.13);
             if (alpha < 0.002) discard;
-            gl_FragColor = vec4(lightColor, min(alpha, 0.18));
+            gl_FragColor = vec4(lightColor, min(alpha, 0.18) * 0.7);
             #include <tonemapping_fragment>
             #include <colorspace_fragment>
           }
         `
       });
       const mesh = new THREE.Mesh(geometry, material);
+      mesh.castShadow = false;
+      mesh.receiveShadow = false;
       mesh.position.fromArray(beam.end).addScaledVector(direction, -length / 2);
       mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
       mesh.scale.copy(uniforms.beamScale.value);

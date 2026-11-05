@@ -10,11 +10,16 @@ export class MenuLogo {
 
     const contact = (label, href, text) => createElement(
       'div',
-      { style: { display: 'grid', gridTemplateColumns: '45px minmax(0, 1fr)', columnGap: this.param.otstup } },
-      createElement('span', null, `${label}:`),
+      { style: { display: 'contents' } },
+      createElement('span', { style: { lineHeight: `${this.param.fontSizeLittel * 1.2}px` } }, `${label}:`),
       createElement('a', {
         href,
-        style: { color: this.param.color, overflowWrap: 'anywhere' }
+        style: {
+          color: label === 'website' ? this.param.color : this.param.colorFont,
+          textDecoration: label === 'website' ? 'underline' : 'none',
+          overflowWrap: 'anywhere',
+          lineHeight: `${this.param.fontSizeLittel * 1.2}px`
+        }
       }, text)
     );
 
@@ -22,7 +27,7 @@ export class MenuLogo {
     this.root.render(createElement(
       'aside',
       {
-        'aria-label': 'Контактная информация',
+        'aria-label': 'Contact information',
         style: {
           position: 'fixed',
           bottom: this.param.otstup,
@@ -30,9 +35,15 @@ export class MenuLogo {
           zIndex: 10,
           maxWidth: `calc(100vw - ${this.param.otstup * 2}px)`,
           boxSizing: 'border-box',
-          font: '12px/1.2 sans-serif',
+          font: `${this.param.fontSizeLittel}px/1.2 sans-serif`,
+          display: 'grid',
+          gridTemplateColumns: 'max-content minmax(0, 1fr)',
+          gridAutoRows: `minmax(${this.param.fontSizeLittel * 1.2}px, auto)`,
+          alignItems: 'start',
+          columnGap: this.param.otstup,
+          rowGap: 0,
           textAlign: 'left',
-          color: this.param.color
+          color: this.param.colorFont
         }
       },
       contact('website', 'https://vorodis2.com', 'vorodis2.com'),

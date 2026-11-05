@@ -6,7 +6,12 @@ function pyramidColumns({ param, initialColumns, onChange }) {
 
   return createElement(
     'label',
-    { className: 'pyramid-columns-control', style: { marginTop: param.otstup } },
+    { className: 'pyramid-columns-control', style: {
+      marginTop: param.otstup,
+      '--control-height': `${Math.max(param.wh * 0.7, param.fontSizeLittel * 1.2 + param.otstup * 2)}px`,
+      fontSize: param.fontSizeLittel,
+      color: param.colorFont
+    } },
     createElement('span', { className: 'pyramid-columns-label' }, `Pyramid columns: ${columns}`),
     createElement('input', {
       type: 'range',
@@ -29,10 +34,10 @@ function pyramidColumns({ param, initialColumns, onChange }) {
 function pyramidTypes({ param, initialType, onChange }) {
   const [selected, setSelected] = useState(initialType);
   const arrTypes = [
-    { type: 'base', label: 'Horizontal pyramid', path: 'M3 17h4v4H3z M8 17h4v4H8z M13 17h4v4h-4z M18 17h4v4h-4z M5.5 12h4v4h-4z M10.5 12h4v4h-4z M15.5 12h4v4h-4z M8 7h4v4H8z M13 7h4v4h-4z M10.5 2h4v4h-4z' },
-    { type: 'wide', label: 'Wide pyramid', path: 'M12 2 22 17 12 22 2 17Z M12 2v20 M2 17l10-5 10 5 M5 12l7-3 7 3 M8 7l4-2 4 2' },
-    { type: 'spiral', label: 'Spiral pyramid', path: 'M3 18a9 4 0 1 0 18 0 9 4 0 1 0-18 0 M5 13a7 3 0 1 0 14 0 7 3 0 1 0-14 0 M8 8a4 2 0 1 0 8 0 4 2 0 1 0-8 0 M12 2v4' },
-    { type: 'random', label: 'Random pieces pyramid', path: 'M2 17h7v5H2z M9 17h5v5H9z M14 17h8v5h-8z M5 11h9v6H5z M14 11h5v6h-5z M8 5h5v6H8z M13 5h3v6h-3z M10 1h4v4h-4z' }
+    { type: 'base', label: 'Horizontal pyramid', path: 'M2 16h6v5H2z M9 16h6v5H9z M16 16h6v5h-6z M5.5 9h6v5h-6z M12.5 9h6v5h-6z M9 2h6v5H9z' },
+    { type: 'random', label: 'Random pieces pyramid', path: 'M2 16h5v5H2z M8.5 16h8v5h-8z M18 16h4v5h-4z M5 9h8v5H5z M14.5 9H19v5h-4.5z M9 2h6v5H9z' },
+    { type: 'wide', label: 'Wide pyramid', path: 'M12 2 22 17 12 22 2 17Z M12 2v20 M2 17l10-5 10 5 M6 10l6-3 6 3' },
+    { type: 'spiral', label: 'Spiral pyramid', path: 'M3 18a9 4 0 1 0 18 0 9 4 0 1 0-18 0 M5 13a7 3 0 1 0 14 0 7 3 0 1 0-14 0 M8 8a4 2 0 1 0 8 0 4 2 0 1 0-8 0 M12 2v4' }
   ];
   return createElement('div', {
     role: 'group', 'aria-label': 'Pyramid layout',
@@ -90,9 +95,8 @@ export class MenuD2 {
     return createElement(
       'section',
       {
-        'aria-label': 'Pyramid Controls',
+        'aria-label': 'Controllers',
         style: {
-          marginTop: this.param.otstup,
           border: '1px solid #c9d3df',
           borderRadius: '5px',
           overflow: 'hidden',
@@ -109,10 +113,10 @@ export class MenuD2 {
           borderBottom: '1px solid #c9d3df',
           fontWeight: 600
         }
-      }, createElement('span', null, 'Pyramid Controls'),
+      }, createElement('span', null, 'Controllers'),
       createElement('button', {
         type: 'button',
-        'aria-label': 'Свернуть или развернуть управление пирамидой',
+        'aria-label': 'Toggle pyramid controls',
         'aria-expanded': this._expanded,
         ref: (element) => { this.toggleButton = element; },
         onClick: () => this.toggle(),

@@ -26,12 +26,12 @@ export class ManagerScan {
     this.visi3D.position3d.powerZum = 15;
     this.visi3D.position3d.pScane.active = true;
     this.visi3D.fov = 42;
-    this.visi3D.zume = 27;
+    this.visi3D.zume = 37;
     this.visi3D.rotationX = 1.15;
-    this.visi3D.rotationZ = 0.4;
-    this.visi3D.xVerh = 1;
-    this.visi3D.yVerh = -1.7;
-    const sceneStorageKey = 'visi3DScene';
+    this.visi3D.rotationZ = 0.4 - THREE.MathUtils.degToRad(45);
+    this.visi3D.xVerh = 0;
+    this.visi3D.yVerh = -3.7;
+    const sceneStorageKey = 'visi3DScene1';
     try {
       const savedScene = JSON.parse(window.localStorage.getItem(sceneStorageKey));
       const arrSceneFields = ['xVerh', 'yVerh', 'zVerh', 'rotationX', 'rotationZ', 'zume', 'fov'];

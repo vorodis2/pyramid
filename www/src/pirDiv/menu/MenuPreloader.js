@@ -10,7 +10,7 @@ export class MenuPreloader {
       zIndex: '5',
       display: 'grid',
       placeItems: 'center',
-      background: 'rgba(220, 231, 242, 0.85)'
+      background: 'rgba(16, 13, 11, 0.15)'
     });
 
     this.slider = document.createElement('div');
@@ -21,18 +21,18 @@ export class MenuPreloader {
     this.slider.setAttribute('aria-valuenow', '0');
     Object.assign(this.slider.style, {
       width: 'min(280px, 70vw)',
-      height: '18px',
-      border: '1px solid #c9d3df',
+      height: `${window.param.fontSizeLittel * 1.2 + window.param.otstup * 2}px`,
+      border: '1px solid #53473c',
       borderRadius: '9px',
       overflow: 'hidden',
-      background: '#e2e8ef'
+      background: '#241e19'
     });
     this.slider.style.position = 'relative';
     this.fill = document.createElement('div');
     Object.assign(this.fill.style, {
       width: '100%',
       height: '100%',
-      background: window.param.color,
+      background: '#53473c',
       transformOrigin: 'left',
       transform: 'scaleX(0)'
     });
@@ -40,7 +40,7 @@ export class MenuPreloader {
     this.label = document.createElement('span');
     Object.assign(this.label.style, {
       position: 'absolute', inset: '0', display: 'grid', placeItems: 'center',
-      font: '12px sans-serif', color: '#243244', textShadow: '0 0 2px white',
+      font: `${window.param.fontSizeLittel}px sans-serif`, color: window.param.colorFont,
       pointerEvents: 'none'
     });
     this.slider.append(this.label);

@@ -17,7 +17,7 @@ export class BStatus {
     });
     if (!arrMeshes.length) return;
     this.material = new THREE.MeshBasicMaterial({
-      color: 0x00ffff, wireframe: true, transparent: true, opacity: 0.8,
+      color: window.param.color, wireframe: true, transparent: true, opacity: 0.15,
       //depthTest: false, 
       depthWrite: false
     });
@@ -62,8 +62,7 @@ export class BStatus {
     const visible = this._active || this._over;
     if (visible) this.create();
     if (this.material) {
-      this.material.color.setHex(this._active && this._over ? 0xff6b8a
-        : this._over ? 0xffc857 : 0x00ffff);
+      this.material.color.set(this._active ? window.param.colorActive : window.param.color);
     }
     for (const overlay of this.arrOverlays) overlay.visible = visible;
   }

@@ -8,7 +8,7 @@ export class Main {
     document.title = `Pyramid V${this.param.version_reliz}.${this.param.version_dev}`;
     window.param = this.param;
     this.param.otstup=4
-    this.localStorage = new LocalStorage(null, 'pirDiv');
+    this.localStorage = new LocalStorage(null, 'pirDiv.v4');
     window.localStorageApp = this.localStorage;
     this.glaf = new Glaf(this);
   }

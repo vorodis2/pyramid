@@ -11,7 +11,7 @@ export class MenuDebager {
     this.menuD2 = new MenuD2(this);
     const otstup = this.param.otstup;
     const collapsedSize = this.param.wh + otstup * 2;
-    const contentWidth = 160 + otstup * 2;
+    const contentWidth = Math.max(this.param.fontSize * 12, this.param.wh * 4 + otstup * 5 + 4);
     const expandedWidth = contentWidth + otstup * 2;
     const menuDebug = window.localStorage.getItem('menuDebug');
     this._active = menuDebug !== 'false';
@@ -23,7 +23,7 @@ export class MenuDebager {
         this.icon.style.color = this.active ? this.param.colorActive : this.param.color;
       }
       if (this.title) {
-        this.title.style.color = this.active ? this.param.colorActive : this.param.color;
+        this.title.style.color = this.param.colorFont;
       }
       if (this.button) {
         this.button.setAttribute('aria-pressed', String(this.active));
@@ -69,7 +69,7 @@ export class MenuDebager {
           borderRadius: '8px',
           background: 'rgba(255, 255, 255, 0.92)',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-          font: '14px sans-serif',
+          font: `${this.param.fontSize}px sans-serif`,
           color: this.param.colorFont
         }
       },
@@ -87,18 +87,18 @@ export class MenuDebager {
             overflow: 'hidden',
             whiteSpace: 'nowrap',
             fontWeight: 600,
-            color: this.active ? this.param.colorActive : this.param.color,
+            color: this.param.colorFont,
             transition: `color ${this.param.timeAnimation}s ease-in-out`
           }
         },
-        'Debug'
+        'Pyramid'
       ),
       createElement(
         'button',
         {
           type: 'button',
-          'aria-label': 'Меню отладки',
-          title: 'Меню отладки',
+          'aria-label': 'Toggle menu',
+          title: 'Toggle menu',
           'aria-pressed': this.active,
           'aria-expanded': this.active,
           ref: (element) => { this.button = element; },
@@ -151,8 +151,8 @@ export class MenuDebager {
           style: {
             flex: '0 1 auto',
             minHeight: 0,
-            width: contentWidth,
-            overflow: 'hidden',
+            width: '100%',
+            overflow: 'auto',
             opacity: this.active ? 1 : 0,
             transform: this.active ? 'translateY(0)' : `translateY(-${otstup * 2}px)`,
             transition: `opacity ${this.param.timeAnimation}s ease-in-out, transform ${this.param.timeAnimation}s ease-in-out`

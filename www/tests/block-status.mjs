@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { BStatus } from '../src/pirDiv/piramidka/Blocks/BStatus.js';
 
+globalThis.window = { param: { color: '#008cba', colorActive: '#ff0000' } };
+
 const content3D = new THREE.Group();
 const mesh = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
 mesh.position.set(1, 2, 3);
@@ -30,11 +32,13 @@ status.active = false;
 assert(status.arrOverlays.every((overlay) => !overlay.visible));
 status.active = true;
 assert.deepEqual(status.arrOverlays, arrOriginalOverlays, 'Reactivation must reuse overlays');
-assert.equal(status.material.color.getHex(), 0x00ffff);
+assert.equal(status.material.color.getHex(), 0xff0000);
+assert.equal(status.material.opacity, 0.15);
 status.over = true;
-assert.equal(status.material.color.getHex(), 0xff6b8a, 'Selected and hovered must have a distinct color');
+assert.equal(status.material.color.getHex(), 0xff0000, 'Selection color takes priority over hover');
 status.active = false;
-assert.equal(status.material.color.getHex(), 0xffc857);
+assert.equal(status.material.color.getHex(), 0x008cba);
+assert.equal(status.material.opacity, 0.15);
 assert(status.arrOverlays.every((overlay) => overlay.visible));
 status.over = false;
 assert(status.arrOverlays.every((overlay) => !overlay.visible));
