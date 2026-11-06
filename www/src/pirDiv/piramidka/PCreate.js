@@ -102,6 +102,28 @@ export class PCreate {
       rot: [0, 310, 0],
       move: true, density: 1, friction: 0.6, restitution: 0.05
     });
+    const dinosaurX = 10;
+    const dinosaurZ = -5.5;
+    for (let i = 0; i < cylinderCount; i++) {
+      this.addBlock({
+        color: i % 2 === 0 ? 0x625446 : 0x53473c,
+        array: [{ type: 'cylinder', size: [1.8, cylinderHeight, 1.8], segments: 64, bevel: 0.05 }],
+        pos: [dinosaurX, groundY + cylinderHeight * (i + 0.5), dinosaurZ],
+        rot: [0, 40, 0],
+        move: true, density: 1, friction: 0.6, restitution: 0.05
+      });
+    }
+    this.addBlock({
+      object3D: {
+        src: new URL('../../../resources/models/indoraptor-10k-512.glb', import.meta.url).href
+      },
+      color: 0x657991,
+      // Center the feet over the pedestal and place the balance point at the soles.
+      array: [{ type: 'model', size: [3.4, 2, 3.4], parts: 5, pos: [-0.444, 1, 0] }],
+      pos: [dinosaurX, groundY + cylinderCount * cylinderHeight + 0.02, dinosaurZ],
+      rot: [0, 40, 0],
+      move: true, density: 1, friction: 0.6, restitution: 0.05
+    });
     this.par.restartPiramidka(this.par.levels, this.par.type);
     this.addBlock({
       bTitle: {
